@@ -63,13 +63,16 @@ wss.on("connection", function(ws){
 		switch(message.type) {
 			case MSG_LOG_IN: {
 
-				loggedIn.foreach(function(val, k) {
-					if (message.content == val.nickname) {
-						ws.send(JSON.stringify({type: MSG_DENIED, reason: DENY_REASON_IN_USE}));
+				found = false;
 
-						break;
+				for(var i in loggedIn) {
+					if (loggedIn.hasOwnProperty(i) && loggedIn[i].nickname == message.content) {
+						ws.send(JSON.stringify({type: MSG_DENIED, reason: DENY_REASON_IN_USE}));
+						found = true;
 					}
-				});
+				}
+
+				if(found) break;
 
 				loggedIn[connKey] = new User(ws);
 				loggedIn[connKey].login(message.content);
