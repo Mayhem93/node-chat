@@ -27,10 +27,12 @@ function getUsersList() {
 	for(var i in wss.clients) {
 		key = wss.clients[i].upgradeReq.headers['sec-websocket-key'];
 		if (loggedIn[key] !== undefined)
-			users.push(loggedIn[key].nickname);
+			users.push({"nickname": loggedIn[key].nickname, "gender": loggedIn[key].gender});
 	}
 
-	users.sort();
+	users.sort(function(a, b){
+		return a.nickname.localeCompare(b.nickname, "ro", {"numeric": true})
+	});
 
 	return users;
 }
@@ -66,7 +68,7 @@ wss.on("connection", function(ws){
 				found = false;
 
 				for(var i in loggedIn) {
-					if (loggedIn.hasOwnProperty(i) && loggedIn[i].nickname == message.content) {
+					if (loggedIn.hasOwnProperty(i) && loggedIn[i].nickname == message.content.name) {
 						ws.send(JSON.stringify({type: MSG_DENIED, reason: DENY_REASON_IN_USE}));
 						found = true;
 					}
@@ -77,10 +79,10 @@ wss.on("connection", function(ws){
 				loggedIn[connKey] = new User(ws);
 				loggedIn[connKey].login(message.content);
 
-				loggedIn[connKey].sendMessage({type: MSG_HELLO, content: "Welcome "+message.content+" !", ts: new Date().getTime()});
+				loggedIn[connKey].sendMessage({type: MSG_HELLO, content: "Welcome "+message.content.name+" !", ts: new Date().getTime()});
 				loggedIn[connKey].sendMessage({type: MSG_MOTD, content: getMOTD(), ts: new Date().getTime()});
 				wss.broadcast({type: MSG_USERLIST, content: getUsersList()});
-				wss.broadcast({type: MSG_USER_ENTER, content: message.content, ts: new Date().getTime()}, connKey);
+				wss.broadcast({type: MSG_USER_ENTER, content: message.content.name, ts: new Date().getTime()}, connKey);
 				break;
 			}
 

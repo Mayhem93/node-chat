@@ -1,9 +1,11 @@
 function User(websocket) {
 	var socket = websocket;
 	nickname = null;
+	gender = null;
 
-	User.prototype.login = (function(name) {
-		this.nickname = name;
+	User.prototype.login = (function(data) {
+		this.nickname = data.name;
+		this.gender = parseInt(data.gender);
 	}).bind(this);
 
 	this.sendMessage = (function(msg){
