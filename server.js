@@ -119,12 +119,11 @@ wss.on("connection", function(ws){
 	});
 
 	ws.on("close", function() {
-		wss.broadcast({type: MSG_USERLIST, content: getUsersList()});
-
 		if (loggedIn[connKey])
 			wss.broadcast({type: MSG_USER_LEFT, content: loggedIn[connKey].nickname, ts: new Date().getTime()});
 
 		delete loggedIn[connKey];
+		wss.broadcast({type: MSG_USERLIST, content: getUsersList()});
 	});
 
 	ws.on("error", function(error){
