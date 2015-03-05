@@ -42,13 +42,17 @@ function getMOTD() {
 }
 
 wss.broadcast = function(message, except) {
-	for(var i in this.clients) {
-		key = wss.clients[i].upgradeReq.headers['sec-websocket-key'];
+	try {
+		for(var i in this.clients) {
+			key = wss.clients[i].upgradeReq.headers['sec-websocket-key'];
 
-		if (key === except)
-			continue;
+			if (key === except)
+				continue;
 
-		this.clients[i].send(JSON.stringify(message));
+			this.clients[i].send(JSON.stringify(message));
+		}
+	} catch (e) {
+		console.log(e.message);
 	}
 };
 
@@ -114,7 +118,7 @@ wss.on("connection", function(ws){
 				break;
 			}
 		}
-		console.log(message);
+		console.log(message, ws.upgradeReq.connection.remoteAddress);
 
 	});
 
